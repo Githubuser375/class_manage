@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hrh.class_manage_system.server.mapper.CourseCategoryMapper">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO course_categories(name, base_fee)
+        VALUES (#{name}, #{baseFee})
+    </insert>
+
+    <update id="update">
+        UPDATE course_categories
+        SET
+            name = #{name},
+            base_fee = #{baseFee}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectAll"
+            resultType="com.hrh.class_manage_system.pojo.entity.CourseCategoryEntity">
+        SELECT
+            id,
+            name,
+            base_fee AS baseFee
+        FROM course_categories
+    </select>
+
+    <select id="selectById"
+            resultType="com.hrh.class_manage_system.pojo.entity.CourseCategoryEntity">
+        SELECT
+            id,
+            name,
+            base_fee AS baseFee
+        FROM course_categories
+        WHERE id = #{id}
+    </select>
+
+
+    <select id="selectBaseFeeByScheduleId" resultType="java.math.BigDecimal">
+        SELECT cc.base_fee
+        FROM course_schedules cs
+                 JOIN courses c ON cs.course_id = c.id
+                 JOIN course_categories cc ON c.category_id = cc.id
+        WHERE cs.id = #{scheduleId}
+    </select>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        DELETE FROM course_categories
+        WHERE id = #{id}
+        AND NOT EXISTS (
+            SELECT 1 FROM employees e
+            WHERE e.category_id = #{id}
+        )
+        AND NOT EXISTS (
+            SELECT 1 FROM courses c
+            WHERE c.category_id = #{id}
+        )
+    </delete>
+</mapper>

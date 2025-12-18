@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hrh.class_manage_system.server.mapper.CourseScheduleMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO course_schedules(course_id, classroom_id, course_date, start_period, end_period, actual_fee)
+        VALUES (#{courseId}, #{classroomId}, #{courseDate}, #{startPeriod}, #{endPeriod}, #{actualFee})
+    </insert>
+
+<resultMap id="CalendarMap" type="com.hrh.class_manage_system.pojo.vo.ScheduleCalendarVO">
+        <id property="id" column="id"/>
+        <result property="date" column="course_date"/>
+        <result property="startPeriod" column="start_period"/>
+        <result property="endPeriod" column="end_period"/>
+        <result property="classroomCode" column="classroom_code"/>
+        <result property="actualFee" column="actual_fee"/>
+        
+        <collection property="teacherNames" ofType="string">
+            <result column="teacher_name"/>
+        </collection>
+        
+        <collection property="teacherIds" ofType="integer">
+            <result column="teacher_id"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectByCourseAndDateRange" resultMap="CalendarMap">
+        SELECT 
+            cs.id, 
+            cs.course_date, 
+            cs.start_period, 
+            cs.end_period, 
+            cs.actual_fee,
+            cr.code AS classroom_code,
+            e.name AS teacher_name,
+            e.id AS teacher_id  FROM course_schedules cs
+        JOIN classrooms cr ON cs.classroom_id = cr.id
+        LEFT JOIN employee_course_schedule ecs ON cs.id = ecs.schedule_id
+        LEFT JOIN employees e ON ecs.employee_id = e.id
+        WHERE cs.course_id = #{courseId}
+          AND cs.course_date BETWEEN #{startDate} AND #{endDate}
+    </select>
+    
+    <select id="countConflict" resultType="int">
+        SELECT COUNT(*) FROM course_schedules
+        WHERE classroom_id = #{classroomId}
+          AND course_date = #{date}
+          AND NOT (end_period &lt; #{startPeriod} OR start_period &gt; #{endPeriod})
+    </select>
+    <select id="selectById" resultType="com.hrh.class_manage_system.pojo.entity.CourseScheduleEntity">
+        SELECT * FROM course_schedules WHERE id = #{id}
+    </select>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        <!-- 开启事务，先删除关联的员工安排，再删除课程安排 -->
+        <!-- 1. 先删除员工-课程安排关联表中的相关记录 -->
+        DELETE FROM employee_course_schedule
+        WHERE schedule_id = #{id};
+        
+        <!-- 2. 再删除课程安排表中的记录 -->
+        DELETE FROM course_schedules
+        WHERE id = #{id};
+    </delete>
+</mapper>

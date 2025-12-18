@@ -1,0 +1,49 @@
+{
+  "course_categories": [
+    { "id": 1, "name": "技术培训", "base_fee": 2000 },
+    { "id": 2, "name": "管理培训", "base_fee": 3000 },
+    { "id": 3, "name": "销售培训", "base_fee": 1500 }
+  ],
+  "courses": [
+    {
+      "id": 1,
+      "name": "数据库原理",
+      "category_id": 1,
+      "category_name": "技术培训",
+      "description": "数据库基础课程",
+      "location": "101",
+      "course_date": "2025-11-14",
+      "start_period": 1,
+      "end_period": 3,
+      "actual_fee": 2000
+    }
+  ],
+  "employees": [
+    {
+      "id": 1,
+      "name": "张老师",
+      "category_id": 1,
+      "category_name": "技术培训",
+      "phone": "13800138000"
+    },
+    {
+      "id": 2,
+      "name": "李老师",
+      "category_id": 2,
+      "category_name": "管理培训",
+      "phone": "13900139000"
+    }
+  ],
+  "course_schedules": [
+    {
+      "id": 101,
+      "course_id": 1,
+      "location": "101",
+      "course_date": "2025-11-14",
+      "start_period": 1,
+      "end_period": 3,
+      "actual_fee": 2000
+    }
+  ],
+  "employee_course_schedule": []
+}

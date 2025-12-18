@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hrh.class_manage_system.server.mapper.EmployeeMapper">
+
+    <insert id="insert">
+        INSERT INTO employees(name, category_id, phone) VALUES (#{name}, #{categoryId}, #{phone})
+    </insert>
+
+    <select id="selectList" resultType="com.hrh.class_manage_system.pojo.vo.EmployeeVO">
+        SELECT e.id, e.name, e.phone, cc.name AS categoryName
+        FROM employees e
+        JOIN course_categories cc ON e.category_id = cc.id
+        <where>
+            <if test="name != null and name != ''">
+                e.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectAvailable" resultType="com.hrh.class_manage_system.pojo.entity.EmployeeEntity">
+        SELECT * FROM employees e
+        WHERE e.category_id = #{categoryId}
+        AND e.id NOT IN (
+            SELECT ecs.employee_id
+            FROM employee_course_schedule ecs
+            JOIN course_schedules cs ON ecs.schedule_id = cs.id
+            WHERE cs.course_date = #{date}
+              AND NOT (cs.end_period &lt; #{startPeriod} OR cs.start_period &gt; #{endPeriod})
+        )
+    </select>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        DELETE e FROM employees e
+        WHERE e.id = #{id}
+        AND NOT EXISTS (
+            SELECT 1 FROM employee_course_schedule ecs
+            WHERE ecs.employee_id = #{id}
+        )
+    </delete>
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hrh.class_manage_system.server.mapper.ClassroomMapper">
+    
+    <select id="selectById" resultType="com.hrh.class_manage_system.pojo.entity.ClassroomEntity">
+        SELECT * FROM classrooms WHERE id = #{id}
+    </select>
+
+    <select id="selectAvailable" resultType="com.hrh.class_manage_system.pojo.entity.ClassroomEntity">
+        SELECT * FROM classrooms c
+        WHERE c.id NOT IN (
+            SELECT cs.classroom_id
+            FROM course_schedules cs
+            WHERE cs.course_date = #{date}
+              AND NOT (cs.end_period &lt; #{startPeriod} OR cs.start_period &gt; #{endPeriod})
+        )
+    </select>
+
+    <select id="selectAll" resultType="com.hrh.class_manage_system.pojo.entity.ClassroomEntity">
+        SELECT * FROM classrooms
+    </select>
+</mapper>
