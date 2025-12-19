@@ -465,14 +465,30 @@ async function fetchAvailableResources() {
 }
 
 async function submitSchedule() {
-  await axios.post('/api/schedule/add', {
-    course_id: form.course_id, date: form.date, start_period: form.start_period, end_period: form.end_period, classroom_id: form.classroom_id, employee_ids: form.employee_ids
+  const response = await axios.post('/api/schedule/add', {
+    course_id: form.course_id,
+    date: form.date,
+    start_period: form.start_period,
+    end_period: form.end_period,
+    classroom_id: form.classroom_id,
+    employee_ids: form.employee_ids
+  }).catch(error => {
+    // 网络错误或HTTP状态码错误
+    ElMessage.error('请求失败，请检查网络')
+    throw error // 不再继续执行
   })
-  ElMessage.success('排课成功')
-  dialogVisible.value = false
-  fetchSchedules()
-}
 
+  const result = response.data
+
+  if (result.code === 1) {
+    ElMessage.success('排课成功')
+    dialogVisible.value = false
+    fetchSchedules()
+  } else {
+    // 直接显示后端返回的错误信息
+    ElMessage.error(result.msg)
+  }
+}
 /* -------------------- [新增] 详情与操作逻辑 -------------------- */
 
 // 1. 点击格子打开详情
