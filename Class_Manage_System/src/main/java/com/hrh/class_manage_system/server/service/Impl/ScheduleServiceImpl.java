@@ -54,8 +54,8 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         // 2. 计算费用
         // ！！！如果 CourseMapper.xml 缺 SQL，这里会报错！！！
-        if(dto.getStartPeriod() >= dto.getEndPeriod()) {
-            throw new RuntimeException("结束节次必须大于开始节次");
+        if(dto.getStartPeriod() > dto.getEndPeriod()) {
+            throw new RuntimeException("结束节次必须大于等于开始节次");
         }
 
         if(dto.getEndPeriod()>=4&&dto.getStartPeriod()<=3||dto.getEndPeriod()>=7&&dto.getStartPeriod()<=6) {
@@ -109,4 +109,5 @@ public class ScheduleServiceImpl implements ScheduleService {
     public void assignEmployees(Integer scheduleId, List<Integer> employeeIds) {
         ecsMapper.assignEmployees(scheduleId, employeeIds);
     }
+
 }
