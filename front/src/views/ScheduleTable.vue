@@ -170,6 +170,9 @@
              {{ name }}
            </el-tag>
         </el-form-item>
+                <el-form-item label="课程费用">
+          <el-tag effect="light">{{ currentDetail.course_fee }}元/节</el-tag>
+        </el-form-item>
       </el-form>
 
       <template #footer>
@@ -492,9 +495,22 @@ async function submitSchedule() {
 /* -------------------- [新增] 详情与操作逻辑 -------------------- */
 
 // 1. 点击格子打开详情
+// 1. 点击格子打开详情
 function openDetailDialog(schedule) {
-  currentDetail.value = schedule
-  detailDialogVisible.value = true
+  currentDetail.value = {
+    ...schedule,
+    // 直接从schedule中获取actual_fee，如果不存在则查找courseList
+    course_fee: schedule.actual_fee || schedule.actualFee ||
+                getCourseActualFee(schedule.course_id) || '未设置'
+  };
+  detailDialogVisible.value = true;
+}
+
+// 辅助函数：从courseList获取课程实际费用
+function getCourseActualFee(courseId) {
+  if (!courseId) return null;
+  const course = courseList.value.find(c => c.id === courseId);
+  return course ? course.actual_fee : null;
 }
 
 // 2. 删除排课

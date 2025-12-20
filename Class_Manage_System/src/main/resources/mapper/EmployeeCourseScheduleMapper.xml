@@ -19,18 +19,29 @@
         WHERE schedule_id = #{scheduleId}
     </select>
 
-    <update id="assignEmployees" parameterType="map">
-        <!-- 1. 先删除该schedule_id下的所有现有分配 -->
-        DELETE FROM employee_course_schedule
-        WHERE schedule_id = #{scheduleId};
-        
-        <!-- 2. 插入新的分配（如果新列表不为空） -->
-        <if test="employeeIds != null and !employeeIds.isEmpty()">
-            INSERT INTO employee_course_schedule (schedule_id, employee_id)
-            VALUES
-            <foreach collection="employeeIds" item="employeeId" separator=",">
-                (#{scheduleId}, #{employeeId})
-            </foreach>
-        </if>
-    </update>
+<update id="assignEmployees">
+    DELETE FROM employee_course_schedule
+    WHERE schedule_id = #{scheduleId};
+
+    <!-- 将list改为实际的参数名 -->
+    <if test="employeeIds != null and employeeIds.size() > 0">
+        INSERT INTO employee_course_schedule (schedule_id, employee_id)
+        VALUES
+        <foreach collection="employeeIds" item="employeeId" separator=",">
+            (#{scheduleId}, #{employeeId})
+        </foreach>;
+    </if>
+
+    UPDATE course_schedules cs
+    JOIN courses c ON cs.course_id = c.id
+    JOIN course_categories cc ON c.category_id = cc.id
+    LEFT JOIN (
+        SELECT schedule_id, COUNT(*) emp_count
+        FROM employee_course_schedule
+        WHERE schedule_id = #{scheduleId}
+        GROUP BY schedule_id
+    ) t ON cs.id = t.schedule_id
+    SET cs.actual_fee = IFNULL(t.emp_count, 0) * cc.base_fee
+    WHERE cs.id = #{scheduleId};
+</update>
 </mapper>
